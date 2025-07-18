@@ -9,7 +9,7 @@ def index():
     weather_data = None
     if request.method == 'POST':
         city = request.form.get('city')
-        api_key = os.getenv('OPENWEATHER_API_KEY')  # Replace with your API key
+        api_key = os.getenv('f3f619aecd9b808fd47fae0d2b718420')  # Replace with your API key
         if api_key:
             response = requests.get(f'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric')
             data = response.json()
