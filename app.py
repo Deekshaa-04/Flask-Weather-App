@@ -6,22 +6,24 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    weather = None
+    weather_data = None
+
     if request.method == 'POST':
         city = request.form.get('city')
-        
-        # 🔐 Best practice: Load from environment or fallback to hardcoded
+        print(f"Form submitted with city: {city}")  # ✅ Debug print
+
+        # Use API key securely or fallback
         api_key = os.getenv('OPENWEATHER_API_KEY', 'f3f619aecd9b808fd47fae0d2b718420')
 
-        if api_key and city:
+        if city and api_key:
             url = f'https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric'
             try:
                 response = requests.get(url, timeout=5)
-                response.raise_for_status()
                 data = response.json()
+                print(data)  # ✅ Debug print full API response
 
                 if data.get('cod') == 200:
-                    weather = {
+                    weather_data = {
                         'city': data['name'],
                         'temperature': round(data['main']['temp'], 1),
                         'humidity': data['main']['humidity'],
@@ -29,23 +31,24 @@ def index():
                         'conditions': data['weather'][0]['description'].title()
                     }
                 else:
-                    weather = {
+                    weather_data = {
                         'city': city.title(),
                         'temperature': 'N/A',
                         'humidity': 'N/A',
                         'wind_speed': 'N/A',
                         'conditions': f"City not found: {data.get('message', '')}"
                     }
-            except requests.exceptions.RequestException:
-                weather = {
+            except requests.RequestException as e:
+                print(f"Error: {e}")
+                weather_data = {
                     'city': city.title(),
                     'temperature': 'N/A',
                     'humidity': 'N/A',
                     'wind_speed': 'N/A',
-                    'conditions': "Error fetching weather data. Please try again."
+                    'conditions': "Error contacting weather API"
                 }
 
-    return render_template('index.html', weather=weather)
+    return render_template('index.html', weather_data=weather_data)
 
 if __name__ == '__main__':
     app.run(debug=True)
